@@ -19,7 +19,7 @@ decode_results results;      // create instance of 'decode_results'
 
 //for the servo motor
 Servo myservo;
-int servoPos = 0;
+int servoPos = 1;
 
 
 int compare1dArrays(int arrayA[], int arrayB[], int length){
@@ -195,7 +195,7 @@ void setup()
    *  [move][pieceMoved][valueForPiece]
    */
 
-  myservo.write(1);
+  //myservo.write(1);
    
   int evaluateRecentMoves[3][3][3] = {
     {
@@ -273,6 +273,7 @@ void Rock() {
   }
   servoPos = 1;
   myservo.write(servoPos);
+  delay(50);
 }
 
 void Paper() {
@@ -281,6 +282,7 @@ void Paper() {
   }
   servoPos = 90;
   myservo.write(servoPos);
+  delay(50);
 }
 
 void Scissors() {
@@ -289,6 +291,7 @@ void Scissors() {
   }
   servoPos = 1;
   myservo.write(servoPos);
+  delay(50);
 }
 
 void Close() {
