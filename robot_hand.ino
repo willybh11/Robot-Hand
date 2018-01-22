@@ -24,6 +24,89 @@ decode_results results;      // create instance of 'decode_results'
 Servo myservo;
 int servoPos = 1;
 
+void Close() {
+  closed = true;
+  Serial.println("calling Close()");
+  digitalWrite(motorPin1, HIGH); //rotates motor
+  digitalWrite(motorPin2, LOW);    // set the Pin motorPin2 LOW
+  delay(2500); //waits
+  digitalWrite(motorPin2, HIGH);    // set the Pin motorPin1 LOW
+}
+
+void Open() {
+  closed = false;
+  Serial.println("calling Open()");
+  digitalWrite(motorPin2, HIGH); //rotates motor
+  digitalWrite(motorPin1, LOW);    // set the Pin motorPin1 LOW
+  delay(2700); //waits
+  digitalWrite(motorPin1, HIGH);    // set the Pin motorPin2 LOW
+}
+
+void color(int r, int g, int b) {
+  digitalWrite(RED, r);
+  digitalWrite(GREEN, g);
+  digitalWrite(BLUE, b);
+}
+
+
+void Rock() {
+  color(255, 0, 0);
+  myservo.write(45);
+  if (!closed) {
+    Close();
+  }
+  delay(500);
+  color(0, 0, 0);
+}
+
+void Scissors() {
+  color(0, 0, 255);
+  myservo.write(45);
+  if (closed) {
+    Open();
+  }
+  delay(500);
+  color(0, 0, 0);
+}
+
+
+
+int translateIR() // takes action based on IR code received
+// describing Remote IR codes
+{
+
+  switch (results.value)
+
+  {
+    case 0xFF30CF: return 1;    break; //1
+    case 0xFF18E7: return 2;    break; //2
+    case 0xFF7A85: return 3;    break; //3
+    case 0xFF02FD: return 4;    break; //pause
+
+
+    default:
+      return 0;
+
+  }
+
+  delay(500); // Do not get immediate repeat
+
+
+} //END translateIR
+
+
+
+
+void Paper() {
+  color(255, 0, 255);
+  myservo.write(135);
+  if (!closed) {
+    Close();
+  }
+  delay(500);
+  color(0, 0, 0);
+}
+
 
 void outputMove(int userMove) {
   if (userMove == 0) {
@@ -62,10 +145,11 @@ void loop()
 goBack:
   while (! irrecv.decode(&results) ) // have we received an IR signal?
   {
+    Serial.println("here");
     delay(100);
   }
   int move = translateIR() - 1;
-  if (move != 0) {
+  if (move == -1) {
     color(0, 255, 0);
     Serial.println("error in IR");
     delay(500);
@@ -73,83 +157,9 @@ goBack:
     irrecv.resume();
     goto goBack;
   }
-  outputMove(rand() % 3);
-  Serial.print("making a "); Serial.println(move);
-  //Serial.print("recieving a "); Serial.println(userMoveInt);
-  irrecv.resume(); // receive the next value
-}
-
-void color(int r, int g, int b) {
-  digitalWrite(RED, r);
-  digitalWrite(GREEN, g);
-  digitalWrite(BLUE, b);
-}
-
-void Rock() {
-  color(255, 0, 0);
-  myservo.write(45);
-  if (!closed) {
-    Close();
-  }
+  if (move != 3) outputMove(move);
+  else outputMove(rand()%3);
+  irrecv.resume();
   delay(500);
-  color(0, 0, 0);
 }
 
-void Paper() {
-  color(255, 0, 255);
-  myservo.write(135);
-  if (!closed) {
-    Close();
-  }
-  delay(500);
-  color(0, 0, 0);
-}
-
-void Scissors() {
-  color(0, 0, 255);
-  myservo.write(45);
-  if (closed) {
-    Open();
-  }
-  delay(500);
-  color(0, 0, 0);
-}
-
-void Close() {
-  closed = true;
-  Serial.println("calling Close()");
-  digitalWrite(motorPin1, HIGH); //rotates motor
-  digitalWrite(motorPin2, LOW);    // set the Pin motorPin2 LOW
-  delay(2500); //waits
-  digitalWrite(motorPin2, HIGH);    // set the Pin motorPin1 LOW
-}
-
-void Open() {
-  closed = false;
-  Serial.println("calling Open()");
-  digitalWrite(motorPin2, HIGH); //rotates motor
-  digitalWrite(motorPin1, LOW);    // set the Pin motorPin1 LOW
-  delay(2700); //waits
-  digitalWrite(motorPin1, HIGH);    // set the Pin motorPin2 LOW
-}
-
-int translateIR() // takes action based on IR code received
-// describing Remote IR codes
-{
-
-  switch (results.value)
-
-  {
-    case 0xFF30CF: return 1;    break; //1
-    case 0xFF18E7: return 2;    break; //2
-    case 0xFF7A85: return 3;    break; //3
-
-    default:
-      return 0;
-
-  }
-
-  delay(500); // Do not get immediate repeat
-
-
-} //END translateIR
