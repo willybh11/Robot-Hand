@@ -24,6 +24,10 @@ decode_results results;      // create instance of 'decode_results'
 Servo myservo;
 int servoPos = 1;
 
+//for the neural net
+
+#define PASTLOOKING 10
+
 void Close() {
   closed = true;
   Serial.println("calling Close()");
@@ -335,6 +339,29 @@ int choseMove(int evaluateRecentMoves[3][3][3],int pastMoves[3], int extendedPas
 }
 
 void loop(){
+
+  int evaluateRecentMoves[3][3][3] = {
+    {
+      {0,0,0},
+      {0,0,0},
+      {0,0,0}
+    },
+    {
+      {0,0,0},
+      {0,0,0},
+      {0,0,0}
+    },
+    {
+      {0,0,0},
+      {0,0,0},
+      {0,0,0}
+    }
+  };
+  int pastMoves[3] = {0,1,2};
+  int extendedPastMoves[PASTLOOKING];
+  char userMove[1];
+  int userMoveInt;
+
   goBack:
   while (! irrecv.decode(&results) ) // have we received an IR signal?
   {
@@ -350,8 +377,8 @@ void loop(){
     irrecv.resume();
     goto goBack;
   }
-  if (move != 3) outputMove(move);
-  else outputMove(choseMove());
-  irrecv.resume();
-  delay(500);
+  if (move == 4) outputMove(rand()%3);//4 means random
+  else outputMove(choseMove(evaluateRecentMoves, pastMoves, extendedPastMoves, move));
+  irrecv.resume();//resumes the IR sensor
+  delay(500);//waits a bit, just to ease out kinks
 }
